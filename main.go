@@ -18,7 +18,7 @@ func main() {
 
 	port := config.GetEnv("APP_PORT")
 	log.Println("Starting server on :" + port + "...")
-	if err := http.ListenAndServe("localhost:"+port+"", r); err != nil {
+	if err := http.ListenAndServe(":"+port+"", r); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
 }
