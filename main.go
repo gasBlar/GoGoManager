@@ -5,10 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gasBlar/GoGoManager/api/v1/routes"
+	"github.com/gasBlar/GoGoManager/config"
 	"github.com/gasBlar/GoGoManager/db"
 )
 
 func main() {
+	config.InitEnv()
 	db, err := db.Init()
 	if err != nil {
 		log.Fatalf("Error initializing the database: %v", err)
@@ -17,8 +19,9 @@ func main() {
 
 	routes.SetupRoutes()
 
-	log.Println("Starting server on :8080...")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	port := config.GetEnv("APP_PORT")
+	log.Println("Starting server on :" + port + "...")
+	if err := http.ListenAndServe("localhost:"+port+"", nil); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
 }

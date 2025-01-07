@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/gasBlar/GoGoManager/config"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/mysql"
@@ -11,11 +12,11 @@ import (
 )
 
 func GetMysqlUrl() string {
-	dbHost := "localhost"
-	dbPort := "3306"
-	dbUser := "root"
-	dbPass := "root"
-	dbName := "gogomanager"
+	dbHost := config.GetEnv("MYSQL_HOST")
+	dbPort := config.GetEnv("MYSQL_PORT")
+	dbUser := config.GetEnv("MYSQL_USER")
+	dbPass := config.GetEnv("MYSQL_PASSWORD")
+	dbName := config.GetEnv("MYSQL_DATABASE")
 
 	return dbUser + ":" + dbPass + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName
 }
