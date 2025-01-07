@@ -1,5 +1,12 @@
 package routes
 
-func SetupRoutes() {
-	SetupExampleRoutes()
+import "github.com/gorilla/mux"
+
+func InitRoutes() *mux.Router {
+	r := mux.NewRouter()
+	s := r.PathPrefix("/api/v1").Subrouter()
+
+	ExampleRoutes(s)
+
+	return r
 }

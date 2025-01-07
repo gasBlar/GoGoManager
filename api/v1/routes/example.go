@@ -1,11 +1,10 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/gasBlar/GoGoManager/api/v1/controllers"
+	"github.com/gorilla/mux"
 )
 
-func SetupExampleRoutes() {
-	http.HandleFunc("/example", controllers.HelloHandler)
+func ExampleRoutes(r *mux.Router) {
+	r.HandleFunc("/example", controllers.HelloHandler).Methods("GET")
 }

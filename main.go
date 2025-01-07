@@ -17,11 +17,11 @@ func main() {
 	}
 	defer db.Close()
 
-	routes.SetupRoutes()
+	r := routes.InitRoutes()
 
 	port := config.GetEnv("APP_PORT")
 	log.Println("Starting server on :" + port + "...")
-	if err := http.ListenAndServe("localhost:"+port+"", nil); err != nil {
+	if err := http.ListenAndServe("localhost:"+port+"", r); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
 }
