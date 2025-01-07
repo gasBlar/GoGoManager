@@ -1,5 +1,5 @@
 CREATE TABLE profileManager (
-    id INT PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     managerId INT,
     name VARCHAR(52) NOT NULL,
     userImage VARCHAR(2083),
