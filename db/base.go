@@ -54,7 +54,7 @@ func NewDB(dbDriver string, dbSource string) (*sql.DB, error) {
 	}
 }
 
-func Init() (*sql.DB, error) {
+func InitDb() (*sql.DB, error) {
 	dbSource := GetMysqlUrl()
 
 	return NewDB("mysql", dbSource)

@@ -7,6 +7,7 @@ func InitRoutes() *mux.Router {
 	s := r.PathPrefix("/api/v1").Subrouter()
 
 	ExampleRoutes(s)
+	AuthRoutes(s)
 
 	return r
 }
