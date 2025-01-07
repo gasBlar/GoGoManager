@@ -11,10 +11,7 @@ import (
 
 func main() {
 	config.InitEnv()
-	database, err := db.InitDb()
-	if err != nil {
-		log.Fatalf("Error initializing the database: %v", err)
-	}
+	database := db.InitDb()
 	defer database.Close()
 
 	r := routes.InitRoutes()

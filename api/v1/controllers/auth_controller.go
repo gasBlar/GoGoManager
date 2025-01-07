@@ -24,24 +24,23 @@ func LoginRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// response := map[string]string{
-	// 	"message": fmt.Sprintf("Successfully received request: %s", req),
-	// }
-
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+
 	if req.Type == "login" {
 		res, err := services.Login(req)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				http.Error(w, "Email is not found", http.StatusNotFound)
 				return
+			} else if err.Error() == "invalid password" {
+				http.Error(w, "Invalid password", http.StatusUnauthorized)
+				return
 			} else {
-				http.Error(w, fmt.Sprintf("Error logging in: %v", err), http.StatusInternalServerError)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 		}
-
+		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(res)
 
 	} else {
@@ -51,10 +50,10 @@ func LoginRegisterHandler(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Email already exists", http.StatusConflict)
 				return
 			} else {
-				http.Error(w, fmt.Sprintf("Error registering: %v", err), http.StatusInternalServerError)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		}
-
+		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(res)
 	}
 
