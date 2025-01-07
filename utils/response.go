@@ -21,7 +21,7 @@ func Response(w http.ResponseWriter, statusCode int, message string, payload int
 	if message != "" {
 		response = &ResponseMessage{Message: message}
 	} else if payload != nil {
-		response = &ResponseData{Data: payload}
+		response = payload
 	}
 
 	res, _ := json.Marshal(response)

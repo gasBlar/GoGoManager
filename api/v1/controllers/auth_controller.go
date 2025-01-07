@@ -21,11 +21,9 @@ func LoginRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = validateAuthRequest(req)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Validation failed: %v", err), http.StatusBadRequest)
+		utils.Response(w, http.StatusBadRequest, fmt.Sprintf("Validation failed: %v", err), nil)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
 
 	if req.Type == "login" {
 		res, err := services.Login(req)
@@ -41,8 +39,7 @@ func LoginRegisterHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(res)
+		utils.Response(w, http.StatusOK, "", res)
 
 	} else {
 		res, err := services.Register(req)
@@ -55,8 +52,7 @@ func LoginRegisterHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(res)
+		utils.Response(w, http.StatusOK, "", res)
 	}
 }
 
