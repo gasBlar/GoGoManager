@@ -35,23 +35,43 @@ func Login(auth models.AuthLoginRequest) (models.AuthLoginResponse, error) {
 
 func Register(auth models.AuthLoginRequest) (models.AuthLoginResponse, error) {
 	database := db.DB
-	defer database.Close()
+	tx, err := database.Begin()
+	if err != nil {
+		return models.AuthLoginResponse{}, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
 	hashedPassword, err := utils.HashPassword(auth.Password)
 	if err != nil {
 		return models.AuthLoginResponse{}, err
 	}
 
 	var existingEmail string
-	err = database.QueryRow("SELECT email FROM auth WHERE email = ?", auth.Email).Scan(&existingEmail)
+	err = tx.QueryRow("SELECT email FROM auth WHERE email = ?", auth.Email).Scan(&existingEmail)
 	if err != sql.ErrNoRows {
 		return models.AuthLoginResponse{}, fmt.Errorf("email already exists")
 	}
 
-	_, err = database.Exec("INSERT INTO auth (email, password) VALUES (?, ?)", auth.Email, hashedPassword)
+	result, err := tx.Exec("INSERT INTO auth (email, password) VALUES (?, ?)", auth.Email, hashedPassword)
+	if err != nil {
+		return models.AuthLoginResponse{}, err
+	}
+	authID, err := result.LastInsertId()
+	if err != nil {
+		return models.AuthLoginResponse{}, err
+	}
+	_, err = tx.Exec("INSERT INTO profileManager (authId) VALUES (?)",
+		authID)
 	if err != nil {
 		return models.AuthLoginResponse{}, err
 	}
 
+	if err = tx.Commit(); err != nil {
+		return models.AuthLoginResponse{}, err
+	}
 	token, err := utils.CreateToken(models.ProfileManagerClaims{Email: auth.Email})
 
 	if err != nil {
