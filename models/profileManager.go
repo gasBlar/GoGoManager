@@ -2,7 +2,7 @@ package models
 
 type ProfileManager struct {
 	Id           int    `json:"id"`
-	ManagerId    int    `json:"manager_id"`
+	AuthId       int    `json:"manager_id"`
 	Name         string `json:"name"`
 	userImage    string `json:"user_image"`
 	companyName  string `json:"company_name"`
@@ -12,7 +12,7 @@ type ProfileManager struct {
 type ProfileManagerAuth struct {
 	Id           int    `json:"id"`
 	Email        string `json:"email"`
-	ManagerId    int    `json:"manager_id"`
+	AuthId       int    `json:"manager_id"`
 	Name         string `json:"name"`
 	userImage    string `json:"user_image"`
 	companyName  string `json:"company_name"`
@@ -20,6 +20,7 @@ type ProfileManagerAuth struct {
 }
 
 type ProfileManagerClaims struct {
-	ManagerId int    `json:"manager_id"`
-	Email     string `json:"email"`
+	Id     int    `json:"id"`
+	AuthId int    `json:"manager_id"`
+	Email  string `json:"email"`
 }

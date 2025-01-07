@@ -6,31 +6,37 @@ import (
 
 	"github.com/gasBlar/GoGoManager/db"
 	"github.com/gasBlar/GoGoManager/models"
+	"github.com/gasBlar/GoGoManager/repository"
 	"github.com/gasBlar/GoGoManager/utils"
 )
 
 func Login(auth models.AuthLoginRequest) (models.AuthLoginResponse, error) {
 	database := db.DB
 
-	var email string
-	var password string
-	err := database.QueryRow("SELECT email, password FROM auth WHERE email = ?", auth.Email).Scan(&email, &password)
+	authRepo := repository.NewAuthRepository(database)
+
+	authData, err := authRepo.FindByEmail(auth.Email)
+	if err != nil {
+		return models.AuthLoginResponse{}, err
+	}
+	if authData.Email == "" {
+		return models.AuthLoginResponse{}, fmt.Errorf("email not found")
+	}
 
 	var result models.AuthLoginResponse
-	if err != nil {
-		return result, err
-	} else {
-		if err := utils.VerifyPassword(password, auth.Password); err != nil {
-			return result, fmt.Errorf("invalid password")
-		}
-		token, err := utils.CreateToken(models.ProfileManagerClaims{Email: auth.Email})
-		if err != nil {
-			return models.AuthLoginResponse{}, err
-		}
 
-		result = models.AuthLoginResponse{Email: auth.Email, Token: token}
-		return result, nil
+	if err := utils.VerifyPassword(authData.Password, auth.Password); err != nil {
+		return result, fmt.Errorf("invalid password")
 	}
+
+	token, err := utils.CreateToken(models.ProfileManagerClaims{Email: authData.Email})
+	if err != nil {
+		return models.AuthLoginResponse{}, err
+	}
+
+	result = models.AuthLoginResponse{Email: authData.Email, Token: token}
+	return result, nil
+
 }
 
 func Register(auth models.AuthLoginRequest) (models.AuthLoginResponse, error) {
@@ -59,20 +65,21 @@ func Register(auth models.AuthLoginRequest) (models.AuthLoginResponse, error) {
 	if err != nil {
 		return models.AuthLoginResponse{}, err
 	}
-	authID, err := result.LastInsertId()
 	if err != nil {
 		return models.AuthLoginResponse{}, err
 	}
-	_, err = tx.Exec("INSERT INTO profileManager (authId) VALUES (?)",
+	authID, err := result.LastInsertId()
+	resProfile, err := tx.Exec("INSERT INTO profileManager (authId) VALUES (?)",
 		authID)
 	if err != nil {
 		return models.AuthLoginResponse{}, err
 	}
+	profileId, err := resProfile.LastInsertId()
 
 	if err = tx.Commit(); err != nil {
 		return models.AuthLoginResponse{}, err
 	}
-	token, err := utils.CreateToken(models.ProfileManagerClaims{Email: auth.Email})
+	token, err := utils.CreateToken(models.ProfileManagerClaims{Id: int(profileId), AuthId: int(authID), Email: auth.Email})
 
 	if err != nil {
 		return models.AuthLoginResponse{}, err
