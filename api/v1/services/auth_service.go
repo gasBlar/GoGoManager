@@ -29,14 +29,13 @@ func Login(auth models.AuthLoginRequest) (models.AuthLoginResponse, error) {
 		return result, fmt.Errorf("invalid password")
 	}
 
-	token, err := utils.CreateToken(models.ProfileManagerClaims{Email: authData.Email})
+	token, err := utils.CreateToken(models.ProfileManagerClaims{Id: int(authData.ProfileManagerId), AuthId: int(authData.Id), Email: auth.Email})
 	if err != nil {
 		return models.AuthLoginResponse{}, err
 	}
 
 	result = models.AuthLoginResponse{Email: authData.Email, Token: token}
 	return result, nil
-
 }
 
 func Register(auth models.AuthLoginRequest) (models.AuthLoginResponse, error) {
