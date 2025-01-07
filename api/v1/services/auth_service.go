@@ -65,20 +65,21 @@ func Register(auth models.AuthLoginRequest) (models.AuthLoginResponse, error) {
 	if err != nil {
 		return models.AuthLoginResponse{}, err
 	}
-	authID, err := result.LastInsertId()
 	if err != nil {
 		return models.AuthLoginResponse{}, err
 	}
-	_, err = tx.Exec("INSERT INTO profileManager (authId) VALUES (?)",
+	authID, err := result.LastInsertId()
+	resProfile, err := tx.Exec("INSERT INTO profileManager (authId) VALUES (?)",
 		authID)
 	if err != nil {
 		return models.AuthLoginResponse{}, err
 	}
+	profileId, err := resProfile.LastInsertId()
 
 	if err = tx.Commit(); err != nil {
 		return models.AuthLoginResponse{}, err
 	}
-	token, err := utils.CreateToken(models.ProfileManagerClaims{Email: auth.Email})
+	token, err := utils.CreateToken(models.ProfileManagerClaims{Id: int(profileId), AuthId: int(authID), Email: auth.Email})
 
 	if err != nil {
 		return models.AuthLoginResponse{}, err

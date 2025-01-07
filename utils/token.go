@@ -11,8 +11,9 @@ import (
 var secretKey []byte
 
 type Claims struct {
-	Email     string `json:"email"`
-	ManagerId int    `json:"managerId"`
+	Id     int    `json:"id"`
+	Email  string `json:"email"`
+	AuthId int    `json:"AuthId"`
 	jwt.RegisteredClaims
 }
 
@@ -23,8 +24,9 @@ func init() {
 
 func CreateToken(userProfile models.ProfileManagerClaims) (string, error) {
 	claims := Claims{
-		Email:     userProfile.Email,
-		ManagerId: userProfile.ManagerId,
+		Id:     userProfile.Id,
+		Email:  userProfile.Email,
+		AuthId: userProfile.AuthId,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 1)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
