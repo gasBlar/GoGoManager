@@ -8,6 +8,7 @@ import (
 
 	"github.com/gasBlar/GoGoManager/api/v1/services"
 	"github.com/gasBlar/GoGoManager/models"
+	"github.com/gasBlar/GoGoManager/utils"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -15,50 +16,44 @@ func LoginRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	var req models.AuthLoginRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		utils.Response(w, http.StatusBadRequest, "Invalid request body", nil)
 		return
 	}
 	err = validateAuthRequest(req)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Validation failed: %v", err), http.StatusBadRequest)
+		utils.Response(w, http.StatusBadRequest, fmt.Sprintf("Validation failed: %v", err), nil)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
 
 	if req.Type == "login" {
 		res, err := services.Login(req)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				http.Error(w, "Email is not found", http.StatusNotFound)
+				utils.Response(w, http.StatusNotFound, "Email is not found", nil)
 				return
 			} else if err.Error() == "invalid password" {
-				http.Error(w, "Invalid password", http.StatusUnauthorized)
+				utils.Response(w, http.StatusInternalServerError, "Invalid password", nil)
 				return
 			} else {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				utils.Response(w, http.StatusInternalServerError, err.Error(), nil)
 				return
 			}
 		}
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(res)
+		utils.Response(w, http.StatusOK, "", res)
 
 	} else {
 		res, err := services.Register(req)
 		if err != nil {
 			if err.Error() == "email already exists" {
-				http.Error(w, "Email already exists", http.StatusConflict)
+				utils.Response(w, http.StatusConflict, "Email already exists", nil)
 				return
 			} else {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				utils.Response(w, http.StatusInternalServerError, err.Error(), nil)
+				return
 			}
 		}
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(res)
+		utils.Response(w, http.StatusOK, "", res)
 	}
-
-	json.NewEncoder(w).Encode("asfas")
-
 }
 
 func validateAuthRequest(req models.AuthLoginRequest) error {

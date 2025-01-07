@@ -1,9 +1,9 @@
 CREATE TABLE profileManager (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    managerId INT,
-    name VARCHAR(52) NOT NULL,
+    authId INT NOT NULL,
+    name VARCHAR(52),
     userImage VARCHAR(2083),
-    companyName VARCHAR(255) NOT NULL,
+    companyName VARCHAR(255),
     companyImage VARCHAR(2083),
-    FOREIGN KEY (managerId) REFERENCES auth(id)
+    FOREIGN KEY (authId) REFERENCES auth(id)
 );
