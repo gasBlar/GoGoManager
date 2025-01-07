@@ -7,4 +7,5 @@ import (
 
 func ExampleRoutes(r *mux.Router) {
 	r.HandleFunc("/example", controllers.HelloHandler).Methods("GET")
+	r.HandleFunc("/example/me", controllers.HelloMeHandler).Methods("GET")
 }

@@ -23,7 +23,7 @@ func Login(auth models.AuthLoginRequest) (models.AuthLoginResponse, error) {
 		if err := utils.VerifyPassword(password, auth.Password); err != nil {
 			return result, fmt.Errorf("invalid password")
 		}
-		token, err := utils.CreateToken(models.ProfileManagerClaims{ManagerId: 1, Email: auth.Email})
+		token, err := utils.CreateToken(models.ProfileManagerClaims{Email: auth.Email})
 		if err != nil {
 			return models.AuthLoginResponse{}, err
 		}

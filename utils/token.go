@@ -26,7 +26,7 @@ func CreateToken(userProfile models.ProfileManagerClaims) (string, error) {
 		Email:     userProfile.Email,
 		ManagerId: userProfile.ManagerId,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 2)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 1)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 		}}
