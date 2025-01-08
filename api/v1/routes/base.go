@@ -12,6 +12,7 @@ func InitRoutes() *mux.Router {
 
 	ExampleRoutes(s)
 	AuthRoutes(s)
+	UserRoutes(s)
 
 	return r
 }
