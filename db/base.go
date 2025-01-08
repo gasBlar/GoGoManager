@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/gasBlar/GoGoManager/config"
 	_ "github.com/go-sql-driver/mysql"
@@ -10,6 +11,8 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/mysql"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
+
+var DB *sql.DB
 
 func GetMysqlUrl() string {
 	dbHost := config.GetEnv("MYSQL_HOST")
@@ -54,8 +57,15 @@ func NewDB(dbDriver string, dbSource string) (*sql.DB, error) {
 	}
 }
 
-func Init() (*sql.DB, error) {
+func InitDb() *sql.DB {
 	dbSource := GetMysqlUrl()
 
-	return NewDB("mysql", dbSource)
+	db, err := NewDB("mysql", dbSource)
+
+	if err != nil {
+		log.Fatalf("Error initializing the database: %v", err)
+	}
+
+	DB = db
+	return db
 }
