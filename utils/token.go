@@ -18,7 +18,6 @@ type Claims struct {
 }
 
 func init() {
-	config.InitEnv()
 	secretKey = []byte(config.GetEnv("SECRET_KEY"))
 }
 
