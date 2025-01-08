@@ -8,9 +8,23 @@ import (
 	"github.com/gasBlar/GoGoManager/utils"
 )
 
+var whitelistPath = []string{
+	"/api/v1/auth",
+	"/metrics",
+}
+
+func isWhitelisted(path string) bool {
+	for _, allowedPath := range whitelistPath {
+		if strings.HasPrefix(path, allowedPath) {
+			return true
+		}
+	}
+	return false
+}
+
 func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/v1/auth" {
+		if isWhitelisted(r.URL.Path) {
 			next.ServeHTTP(w, r)
 			return
 		}
