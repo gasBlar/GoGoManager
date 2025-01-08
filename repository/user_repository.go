@@ -8,6 +8,7 @@ import (
 
 type UserRepository interface {
 	FindById(id int) (models.ProfileManagerAuth, error)
+	UpdatePartial(id int, user models.ProfileManagerUpdateRequest) (models.ProfileManagerAuth, error)
 }
 
 type userRepository struct {
@@ -32,4 +33,70 @@ func (r *userRepository) FindById(id int) (models.ProfileManagerAuth, error) {
 	}
 
 	return user, nil
+}
+
+func (r *userRepository) UpdatePartial(id int, user models.ProfileManagerUpdateRequest) (models.ProfileManagerAuth, error) {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return models.ProfileManagerAuth{}, err
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if user.Name != "" || user.UserImage != "" || user.CompanyName != "" || user.CompanyImage != "" {
+		query := "UPDATE profileManager SET"
+		args := []interface{}{}
+
+		if user.Name != "" {
+			query += " name = ?,"
+			args = append(args, user.Name)
+		}
+		if user.UserImage != "" {
+			query += " userImage = ?,"
+			args = append(args, user.UserImage)
+		}
+		if user.CompanyName != "" {
+			query += " companyName = ?,"
+			args = append(args, user.CompanyName)
+		}
+		if user.CompanyImage != "" {
+			query += " companyImage = ?,"
+			args = append(args, user.CompanyImage)
+		}
+
+		query = query[:len(query)-1] + " WHERE id = ?"
+		args = append(args, id)
+
+		_, err = tx.Exec(query, args...)
+		if err != nil {
+			return models.ProfileManagerAuth{}, err
+		}
+	}
+
+	if user.Email != "" {
+		emailQuery := "UPDATE auth SET email = ? WHERE id = (SELECT authId FROM profileManager WHERE id = ?)"
+		_, err = tx.Exec(emailQuery, user.Email, id)
+		if err != nil {
+			return models.ProfileManagerAuth{}, err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return models.ProfileManagerAuth{}, err
+	}
+
+	updatedUser, err := r.FindById(id)
+	if err != nil {
+		return models.ProfileManagerAuth{}, err
+	}
+
+	return updatedUser, nil
 }

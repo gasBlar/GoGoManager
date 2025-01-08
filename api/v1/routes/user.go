@@ -7,5 +7,5 @@ import (
 
 func UserRoutes(r *mux.Router) {
 	r.HandleFunc("/user", controllers.GetDataUserHandler).Methods("GET")
-	// r.HandleFunc("/user", controllers.LoginRegisterHandler).Methods("PATCH")
+	r.HandleFunc("/user", controllers.UpdateDataUserHandler).Methods("PATCH")
 }

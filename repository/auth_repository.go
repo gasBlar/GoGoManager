@@ -8,6 +8,8 @@ import (
 
 type AuthRepository interface {
 	FindByEmail(email string) (models.AuthLogin, error)
+	CheckEmailExist(email string) bool
+	CheckEmailExistExceptManagerId(email string, id int) bool
 }
 
 type authRepository struct {
@@ -32,4 +34,16 @@ func (r *authRepository) FindByEmail(email string) (models.AuthLogin, error) {
 	}
 
 	return auth, nil
+}
+
+func (r *authRepository) CheckEmailExist(email string) bool {
+	var existingEmail string
+	res := r.db.QueryRow("SELECT email FROM auth WHERE email = ?", email).Scan(&existingEmail)
+	return res != sql.ErrNoRows
+}
+
+func (r *authRepository) CheckEmailExistExceptManagerId(email string, id int) bool {
+	var existingEmail string
+	res := r.db.QueryRow("SELECT email FROM auth WHERE email = ? AND id != ?", email, id).Scan(&existingEmail)
+	return res != sql.ErrNoRows
 }
