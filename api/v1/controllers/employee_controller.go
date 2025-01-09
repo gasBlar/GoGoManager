@@ -67,3 +67,24 @@ func (c *EmployeeController) DeleteEmployee(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Employee deleted successfully"})
 }
+
+func (c *EmployeeController) PatchEmployee(w http.ResponseWriter, r *http.Request) {
+	var employee models.EmployeePatch
+	if err := json.NewDecoder(r.Body).Decode(&employee); err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+
+	// Ambil identityNumber dari URL
+	vars := mux.Vars(r)
+	identityNumber := vars["identityNumber"]
+
+	if err := c.Service.PatchEmployee(identityNumber, &employee); err != nil {
+		log.Println("Error Updating employee:", err)
+		http.Error(w, "Error updating employee", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Employee updated successfully"})
+}
