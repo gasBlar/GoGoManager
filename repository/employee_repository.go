@@ -23,3 +23,12 @@ func (r *EmployeeRepository) CreateEmployee(employee *models.Employee) error {
 	}
 	return nil
 }
+
+func (r *EmployeeRepository) DeleteEmployee(identityNumber string) error {
+	query := `DELETE FROM employee WHERE identityNumber = ?`
+	_, err := r.DB.Exec(query, identityNumber)
+	if err != nil {
+		return err // Return the exact error for logging
+	}
+	return nil
+}

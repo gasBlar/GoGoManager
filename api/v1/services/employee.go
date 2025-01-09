@@ -43,3 +43,7 @@ func GetAllEmployees(ctx context.Context, db *sql.DB) ([]models.Employee, error)
 
 	return employees, nil
 }
+
+func (s *EmployeeService) DeleteEmployee(identityNumber string) error {
+	return s.Repo.DeleteEmployee(identityNumber)
+}

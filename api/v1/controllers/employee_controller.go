@@ -9,6 +9,7 @@ import (
 
 	"github.com/gasBlar/GoGoManager/api/v1/services"
 	"github.com/gasBlar/GoGoManager/models"
+	"github.com/gorilla/mux"
 	// "github.com/gasBlar/GoGoManager/utils"
 	// "github.com/go-playground/validator/v10"
 )
@@ -52,4 +53,17 @@ func GetEmployees(db *sql.DB) http.HandlerFunc {
 			return
 		}
 	}
+}
+
+func (c *EmployeeController) DeleteEmployee(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["identityNumber"]
+
+	if err := c.Service.DeleteEmployee(id); err != nil {
+		http.Error(w, "Error deleting employee", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Employee deleted successfully"})
 }
