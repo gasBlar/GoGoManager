@@ -3,6 +3,7 @@ services:
     build: .
     ports:
       - "8080:8080"
+    container_name: app
     environment:
       - APP_PORT=8080
       - MYSQL_HOST=db
@@ -16,6 +17,7 @@ services:
 
   db:
     image: mysql:8.0
+    container_name: db
     ports:
       - "3306:3306"
     environment:
@@ -33,6 +35,8 @@ services:
       - "9090:9090"
     depends_on:
       - app
+      - mysql-exporter
+      - node-exporter
 
   grafana:
     image: grafana/grafana-oss:latest
@@ -43,6 +47,35 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - prometheus
+
+  mysql-exporter:
+    image: quay.io/prometheus/mysqld-exporter
+    command:
+      - --config.my-cnf=/etc/mysql-exporter/.my.cnf
+      - --collect.info_schema.tablestats
+      - --mysqld.address=db:3306
+    container_name: mysql-exporter
+    environment:
+      - DATA_SOURCE_NAME=root:exporter@(db:3306)/
+    volumes:
+      - ./prometheus/.my.cnf:/etc/mysql-exporter/.my.cnf
+    ports:
+      - 9104:9104
+    links:
+      - db
+    depends_on:
+      - db
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: node-exporter
+    ports:
+      - 9100:9100
+    volumes:
+      - "/:/etc/node-exporter"
+
+
+
       
 volumes:
   db_data:
