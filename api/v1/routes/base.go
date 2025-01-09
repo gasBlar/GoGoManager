@@ -22,6 +22,7 @@ func InitRoutes(db *sql.DB) *mux.Router {
 	AuthRoutes(s)
 	UserRoutes(s)
 	EmployeeRoutes(db, s)
+	DepartmentRoutes(db, s)
 
 	return r
 }
