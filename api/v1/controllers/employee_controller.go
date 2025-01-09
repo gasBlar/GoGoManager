@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log"
 
@@ -39,21 +38,34 @@ func (c *EmployeeController) CreateEmployee(w http.ResponseWriter, r *http.Reque
 	json.NewEncoder(w).Encode(map[string]string{"message": "Employee created successfully"})
 }
 
-func GetEmployees(db *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		employees, err := services.GetAllEmployees(r.Context(), db)
-		if err != nil {
-			http.Error(w, "Failed to retrieve employees", http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(employees); err != nil {
-			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-			return
-		}
+func (c *EmployeeController) GetAllEmployees(w http.ResponseWriter, r *http.Request) {
+	// Mendapatkan data seluruh employee dari service
+	employees, err := c.Service.GetAllEmployees()
+	if err != nil {
+		http.Error(w, "Error retrieving employees", http.StatusInternalServerError)
+		return
 	}
+
+	// Menyusun respons dalam format JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(employees)
 }
+
+// func GetEmployees(db *sql.DB) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		employees, err := services.GetAllEmployees(r.Context(), db)
+// 		if err != nil {
+// 			http.Error(w, "Failed to retrieve employees", http.StatusInternalServerError)
+// 			return
+// 		}
+
+// 		w.Header().Set("Content-Type", "application/json")
+// 		if err := json.NewEncoder(w).Encode(employees); err != nil {
+// 			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+// 			return
+// 		}
+// 	}
+// }
 
 func (c *EmployeeController) DeleteEmployee(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

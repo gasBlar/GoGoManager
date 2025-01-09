@@ -17,7 +17,7 @@ func EmployeeRoutes(db *sql.DB, r *mux.Router) {
 
 	// Register route
 	r.HandleFunc("/employee", employeeController.CreateEmployee).Methods("POST")
-	r.HandleFunc("/employee", controllers.GetEmployees(db)).Methods("GET")
+	r.HandleFunc("/employee", employeeController.GetAllEmployees).Methods("GET")
 	r.HandleFunc("/employee/{identityNumber}", employeeController.DeleteEmployee).Methods("DELETE")
 	r.HandleFunc("/employee/{identityNumber}", employeeController.PatchEmployee).Methods("PATCH")
 }

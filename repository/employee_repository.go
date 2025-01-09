@@ -15,6 +15,28 @@ func NewEmployeeRepository(db *sql.DB) *EmployeeRepository {
 	return &EmployeeRepository{DB: db}
 }
 
+func (r *EmployeeRepository) GetAllEmployees() ([]models.Employee, error) {
+	// Query untuk mengambil semua data employee
+	rows, err := r.DB.Query("SELECT identityNumber, name, employeeImageUri, gender, departmentId FROM employee")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var employees []models.Employee
+
+	// Iterasi hasil query dan masukkan ke dalam slice employees
+	for rows.Next() {
+		var employee models.Employee
+		if err := rows.Scan(&employee.IdentityNumber, &employee.Name, &employee.EmployeeImageUri, &employee.Gender, &employee.DepartmentId); err != nil {
+			return nil, err
+		}
+		employees = append(employees, employee)
+	}
+
+	return employees, nil
+}
+
 func (r *EmployeeRepository) CreateEmployee(employee *models.Employee) error {
 	query := `INSERT INTO employee (identityNumber, name, employeeImageUri, gender, departmentId) 
               VALUES (?, ?, ?, ?, ?)`
@@ -33,14 +55,6 @@ func (r *EmployeeRepository) DeleteEmployee(identityNumber string) error {
 	}
 	return nil
 }
-
-// // Helper function to join array of strings with a separator
-// func join(arr []string, sep string) string {
-// 	if len(arr) == 0 {
-// 		return ""
-// 	}
-// 	return fmt.Sprintf("%s", arr[0])
-// }
 
 func (r *EmployeeRepository) PatchEmployee(identityNumber string, employee *models.EmployeePatch) error {
 	// Buat query SQL secara dinamis berdasarkan kolom yang diubah
