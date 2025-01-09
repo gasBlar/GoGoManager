@@ -1,7 +1,7 @@
 package models
 
 type Department struct {
-	ID          int    `json:"id"`
+	Id          int    `json:"id"`
 	Name        string `json:"name"`
-	Description string `json:"description"`
+	ProfileId	string `json:"profileId"`
 }

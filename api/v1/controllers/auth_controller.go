@@ -25,7 +25,7 @@ func LoginRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Type == "login" {
+	if req.Action == "login" {
 		res, err := services.Login(req)
 		if err != nil {
 			if err == sql.ErrNoRows {
