@@ -1,12 +1,14 @@
 package routes
 
 import (
+	"database/sql"
+
 	"github.com/gasBlar/GoGoManager/api/v1/middleware"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func InitRoutes() *mux.Router {
+func InitRoutes(db *sql.DB) *mux.Router {
 	r := mux.NewRouter()
 	r.Use(middleware.JWTMiddleware)
 	r.Use(middleware.LogMiddleware)
@@ -19,6 +21,7 @@ func InitRoutes() *mux.Router {
 	ExampleRoutes(s)
 	AuthRoutes(s)
 	UserRoutes(s)
+	EmployeeRoutes(db, s)
 
 	return r
 }

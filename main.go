@@ -13,7 +13,7 @@ func main() {
 	database := db.InitDb()
 	defer database.Close()
 
-	r := routes.InitRoutes()
+	r := routes.InitRoutes(database)
 
 	port := config.GetEnv("APP_PORT")
 	log.Println("Starting server on :" + port + "...")
