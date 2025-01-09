@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log/slog"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -50,7 +49,6 @@ func TrackMetrics(next http.Handler) http.Handler {
 		path := r.URL.Path
 		next.ServeHTTP(crw, r)
 		status := crw.statusCode
-		slog.Info("tracks metrics: ", "method", r.Method, "path", path, "status", http.StatusText(status))
 		RequestCount.WithLabelValues(path, string(status)).Inc()
 		if status >= 400 {
 			ErrorCount.WithLabelValues(path, string(status)).Inc()
