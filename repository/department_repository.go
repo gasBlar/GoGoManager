@@ -15,7 +15,7 @@ func NewDepartmentRepository(db *sql.DB) *DepartmentRepository {
 }
 
 func (r *DepartmentRepository) CreateDepartment(department *models.Department, id int) error {
-	query := `INSERT INTO department (name, ProfileId) 
+	query := `INSERT INTO department (name, profileId) 
               VALUES (?, ?)`
 	_, err := r.DB.Exec(query, department.Name, id)
 	if err != nil {
