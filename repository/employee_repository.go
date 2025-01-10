@@ -38,10 +38,17 @@ func (r *EmployeeRepository) ValidateManagerAccess(managerId int, identityNumber
 	return nil
 }
 
-func (r *EmployeeRepository) GetAllEmployees() ([]models.Employee, error) {
+func (r *EmployeeRepository) GetAllEmployees(managerId int) ([]models.Employee, error) {
 	// Query untuk mengambil semua data employee
-	rows, err := r.DB.Query("SELECT identityNumber, name, employeeImageUri, gender, departmentId FROM employee")
+	query := `SELECT e.identityNumber, e.name, e.employeeImageUri, e.gender, e.departmentId
+    		FROM employee e
+    		INNER JOIN department d ON e.departmentId = d.id
+    		INNER JOIN profileManager pm ON d.profileId = pm.id
+    		WHERE pm.id = ?`
+
+	rows, err := r.DB.Query(query, managerId)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
