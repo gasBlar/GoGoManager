@@ -28,6 +28,11 @@ func (c *EmployeeController) CreateEmployee(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	if err := utils.ValidateAddEmployee(employee); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	if err := c.Service.CreateEmployee(&employee); err != nil {
 		log.Println("Error creating employee:", err)
 		http.Error(w, "Error creating employee", http.StatusInternalServerError)
@@ -85,6 +90,11 @@ func (c *EmployeeController) PatchEmployee(w http.ResponseWriter, r *http.Reques
 	// Ambil identityNumber dari URL
 	vars := mux.Vars(r)
 	identityNumber := vars["identityNumber"]
+
+	if err := utils.ValidateAddEmployee(employee); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	if err := c.Service.PatchEmployee(user.Id, identityNumber, &employee); err != nil {
 		if err.Error() == "access denied: manager does not have permission to modify this employee" {
