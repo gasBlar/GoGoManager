@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log"
 
@@ -9,8 +8,8 @@ import (
 
 	"github.com/gasBlar/GoGoManager/api/v1/services"
 	"github.com/gasBlar/GoGoManager/models"
+	"github.com/gasBlar/GoGoManager/utils"
 	"github.com/gorilla/mux"
-	// "github.com/gasBlar/GoGoManager/utils"
 	// "github.com/go-playground/validator/v10"
 )
 
@@ -39,27 +38,30 @@ func (c *EmployeeController) CreateEmployee(w http.ResponseWriter, r *http.Reque
 	json.NewEncoder(w).Encode(map[string]string{"message": "Employee created successfully"})
 }
 
-func GetEmployees(db *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		employees, err := services.GetAllEmployees(r.Context(), db)
-		if err != nil {
-			http.Error(w, "Failed to retrieve employees", http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(employees); err != nil {
-			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-			return
-		}
+func (c *EmployeeController) GetAllEmployees(w http.ResponseWriter, r *http.Request) {
+	// user := r.Context().Value("user").(*utils.Claims)
+	// Mendapatkan data seluruh employee dari service
+	employees, err := c.Service.GetAllEmployees()
+	if err != nil {
+		http.Error(w, "Error retrieving employees", http.StatusInternalServerError)
+		return
 	}
+
+	// Menyusun respons dalam format JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(employees)
 }
 
 func (c *EmployeeController) DeleteEmployee(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["identityNumber"]
+	identityNumber := vars["identityNumber"]
+	user := r.Context().Value("user").(*utils.Claims)
 
-	if err := c.Service.DeleteEmployee(id); err != nil {
+	if err := c.Service.DeleteEmployee(user.Id, identityNumber); err != nil {
+		if err.Error() == "access denied: manager does not have permission to modify this employee" {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
 		http.Error(w, "Error deleting employee", http.StatusInternalServerError)
 		return
 	}
@@ -69,6 +71,10 @@ func (c *EmployeeController) DeleteEmployee(w http.ResponseWriter, r *http.Reque
 }
 
 func (c *EmployeeController) PatchEmployee(w http.ResponseWriter, r *http.Request) {
+	// Ambil managerId dari token (contoh dengan header Authorization)
+	user := r.Context().Value("user").(*utils.Claims)
+	log.Println(user.Id)
+
 	var employee models.EmployeePatch
 	if err := json.NewDecoder(r.Body).Decode(&employee); err != nil {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
@@ -79,7 +85,11 @@ func (c *EmployeeController) PatchEmployee(w http.ResponseWriter, r *http.Reques
 	vars := mux.Vars(r)
 	identityNumber := vars["identityNumber"]
 
-	if err := c.Service.PatchEmployee(identityNumber, &employee); err != nil {
+	if err := c.Service.PatchEmployee(user.Id, identityNumber, &employee); err != nil {
+		if err.Error() == "access denied: manager does not have permission to modify this employee" {
+			http.Error(w, err.Error(), http.StatusForbidden)
+			return
+		}
 		log.Println("Error Updating employee:", err)
 		http.Error(w, "Error updating employee", http.StatusInternalServerError)
 		return
