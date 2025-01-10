@@ -10,8 +10,6 @@ import (
 )
 
 func main() {
-
-	config.LoadConfig()
 	database := db.InitDb()
 	defer database.Close()
 
