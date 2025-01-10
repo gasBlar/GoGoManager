@@ -39,9 +39,10 @@ func (c *EmployeeController) CreateEmployee(w http.ResponseWriter, r *http.Reque
 }
 
 func (c *EmployeeController) GetAllEmployees(w http.ResponseWriter, r *http.Request) {
-	// user := r.Context().Value("user").(*utils.Claims)
+	user := r.Context().Value("user").(*utils.Claims)
+	managerId := user.Id
 	// Mendapatkan data seluruh employee dari service
-	employees, err := c.Service.GetAllEmployees()
+	employees, err := c.Service.GetAllEmployees(managerId)
 	if err != nil {
 		http.Error(w, "Error retrieving employees", http.StatusInternalServerError)
 		return
