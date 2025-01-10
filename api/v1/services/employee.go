@@ -45,10 +45,10 @@ func (s *EmployeeService) GetAllEmployees() ([]models.Employee, error) {
 // 	return employees, nil
 // }
 
-func (s *EmployeeService) DeleteEmployee(identityNumber string) error {
-	return s.Repo.DeleteEmployee(identityNumber)
+func (s *EmployeeService) DeleteEmployee(userId int, identityNumber string) error {
+	return s.Repo.DeleteEmployee(userId, identityNumber)
 }
 
-func (s *EmployeeService) PatchEmployee(identityNumber string, employeePatch *models.EmployeePatch) error {
-	return s.Repo.PatchEmployee(identityNumber, employeePatch)
+func (s *EmployeeService) PatchEmployee(managerId int, identityNumber string, employeePatch *models.EmployeePatch) error {
+	return s.Repo.PatchEmployee(managerId, identityNumber, employeePatch)
 }

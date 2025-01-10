@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 
 	"github.com/gasBlar/GoGoManager/models"
@@ -13,6 +14,28 @@ type EmployeeRepository struct {
 
 func NewEmployeeRepository(db *sql.DB) *EmployeeRepository {
 	return &EmployeeRepository{DB: db}
+}
+
+// Fungsi untuk memvalidasi apakah manager memiliki akses ke employee
+func (r *EmployeeRepository) ValidateManagerAccess(managerId int, identityNumber string) error {
+	query := `
+        SELECT COUNT(*)
+        FROM employee e
+        JOIN department d ON e.departmentId = d.id
+        JOIN profileManager pm ON d.profileId = pm.id
+        WHERE e.identityNumber = ? AND pm.id = ?`
+
+	var count int
+	err := r.DB.QueryRow(query, identityNumber, managerId).Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		return errors.New("access denied: manager does not have permission to modify this employee")
+	}
+
+	return nil
 }
 
 func (r *EmployeeRepository) GetAllEmployees() ([]models.Employee, error) {
@@ -47,7 +70,11 @@ func (r *EmployeeRepository) CreateEmployee(employee *models.Employee) error {
 	return nil
 }
 
-func (r *EmployeeRepository) DeleteEmployee(identityNumber string) error {
+func (r *EmployeeRepository) DeleteEmployee(managerId int, identityNumber string) error {
+	if err := r.ValidateManagerAccess(managerId, identityNumber); err != nil {
+		return err
+	}
+
 	query := `DELETE FROM employee WHERE identityNumber = ?`
 	_, err := r.DB.Exec(query, identityNumber)
 	if err != nil {
@@ -56,7 +83,12 @@ func (r *EmployeeRepository) DeleteEmployee(identityNumber string) error {
 	return nil
 }
 
-func (r *EmployeeRepository) PatchEmployee(identityNumber string, employee *models.EmployeePatch) error {
+func (r *EmployeeRepository) PatchEmployee(managerId int, identityNumber string, employee *models.EmployeePatch) error {
+
+	if err := r.ValidateManagerAccess(managerId, identityNumber); err != nil {
+		return err
+	}
+
 	// Buat query SQL secara dinamis berdasarkan kolom yang diubah
 	query := "UPDATE employee SET "
 	var args []interface{}
