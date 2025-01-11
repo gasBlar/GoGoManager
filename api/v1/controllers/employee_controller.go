@@ -33,14 +33,18 @@ func (c *EmployeeController) CreateEmployee(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := c.Service.CreateEmployee(&employee); err != nil {
-		log.Println("Error creating employee:", err)
+	createdEmployee, err := c.Service.CreateEmployee(&employee)
+	if err != nil {
 		http.Error(w, "Error creating employee", http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Employee created successfully"})
+	json.NewEncoder(w).Encode(createdEmployee)
+
+	// w.WriteHeader(http.StatusCreated)
+	// json.NewEncoder(w).Encode(map[string]string{"message": "Employee created successfully"})
 }
 
 func (c *EmployeeController) GetAllEmployees(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +100,8 @@ func (c *EmployeeController) PatchEmployee(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if err := c.Service.PatchEmployee(user.Id, identityNumber, &employee); err != nil {
+	newIdentityNumber, err := c.Service.PatchEmployee(user.Id, identityNumber, &employee)
+	if err != nil {
 		if err.Error() == "access denied: manager does not have permission to modify this employee" {
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
@@ -106,6 +111,19 @@ func (c *EmployeeController) PatchEmployee(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// Ambil data employee yang baru diperbarui
+	updatedEmployee, err := c.Service.GetEmployeeByIdentityNumber(user.Id, newIdentityNumber)
+	if err != nil {
+		log.Println("Error fetching updated employee:", err)
+		http.Error(w, "Error fetching updated employee", http.StatusInternalServerError)
+		return
+	}
+
+	// Kirimkan response JSON dengan format sesuai permintaan
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Employee updated successfully"})
+	json.NewEncoder(w).Encode(updatedEmployee)
+
+	// w.WriteHeader(http.StatusOK)
+	// json.NewEncoder(w).Encode(map[string]string{"message": "Employee updated successfully"})
 }
