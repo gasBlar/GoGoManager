@@ -18,4 +18,6 @@ func DepartmentRoutes(db *sql.DB, r *mux.Router) {
 	// Register route
 	r.HandleFunc("/department", departmentController.CreateDepartment).Methods("POST")
 	r.HandleFunc("/department", controllers.GetDepartments(db)).Methods("GET")
+	r.HandleFunc("/department/{departmentId}", departmentController.PatchDepartment).Methods("PATCH")
+	r.HandleFunc("/department/{departmentId}", departmentController.DeleteDepartment).Methods("DELETE")
 }
