@@ -1,8 +1,0 @@
-CREATE TABLE fileUpload (
-    id SERIAL PRIMARY KEY,
-    profileId INT NOT NULL,
-    uri TEXT NOT NULL,
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (profileId) REFERENCES profileManager(id) ON DELETE CASCADE
-);
