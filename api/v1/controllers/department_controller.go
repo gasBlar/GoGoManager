@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"strconv"
 
 	"net/http"
 
@@ -36,7 +37,11 @@ func (c *DepartmentController) CreateDepartment(w http.ResponseWriter, r *http.R
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Department created successfully"})
+	response := map[string]string{
+		"departmentId": strconv.Itoa(department.Id), // Assuming department.ID is set by the service
+		"name":         department.Name,
+	}
+	json.NewEncoder(w).Encode(response)
 }
 
 func (c *DepartmentController) PatchDepartment(w http.ResponseWriter, r *http.Request) {
@@ -64,19 +69,20 @@ func (c *DepartmentController) PatchDepartment(w http.ResponseWriter, r *http.Re
 func (c *DepartmentController) DeleteDepartment(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	departmentId := vars["departmentId"]
-	user := r.Context().Value("user").(*utils.Claims)
+	// user := r.Context().Value("user").(*utils.Claims)
 
-	if err := c.Service.DeleteDepartment(user.Id, departmentId); err != nil {
+	if err := c.Service.DeleteDepartment(departmentId); err != nil {
 		if err.Error() == "access denied: manager does not have permission to modify this department" {
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
+		log.Println("Error Deleting departmentawdasdaw:", err)
 		http.Error(w, "Error deleting department", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Department deleted successfully"})
+	// json.NewEncoder(w).Encode(map[string]string{"message": "Department deleted successfully"})
 }
 
 func GetDepartments(db *sql.DB) http.HandlerFunc {
@@ -87,8 +93,21 @@ func GetDepartments(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		// Map the departments to the new structure
+		type DepartmentResponse struct {
+			DepartmentID int    `json:"departmentId"`
+			Name         string `json:"name"`
+		}
+		var response []DepartmentResponse
+		for _, dept := range departments {
+			response = append(response, DepartmentResponse{
+				DepartmentID: dept.Id,
+				Name:         dept.Name,
+			})
+		}
+
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(departments); err != nil {
+		if err := json.NewEncoder(w).Encode(response); err != nil {
 			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 			return
 		}

@@ -50,13 +50,10 @@ func (r *DepartmentRepository) PatchDepartment(departmentId string, department *
 	return nil
 }
 
-func (r *DepartmentRepository) DeleteDepartment(managerId int, identityNumber string) error {
-	// if err := r.ValidateManagerAccess(managerId, identityNumber); err != nil {
-	// 	return err
-	// }
+func (r *DepartmentRepository) DeleteDepartment(departmenId string) error {
 
 	query := `DELETE FROM department WHERE Id = ?`
-	_, err := r.DB.Exec(query, identityNumber)
+	_, err := r.DB.Exec(query, departmenId)
 	if err != nil {
 		return err // Return the exact error for logging
 	}

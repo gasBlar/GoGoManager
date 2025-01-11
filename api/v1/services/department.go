@@ -48,6 +48,6 @@ func (s *DepartmentService) PatchDepartment(departmentId string, departmentPatch
 	return s.Repo.PatchDepartment(departmentId, departmentPatch)
 }
 
-func (s *DepartmentService) DeleteDepartment(userId int, departmentId string) error {
-	return s.Repo.DeleteDepartment(userId, departmentId)
+func (s *DepartmentService) DeleteDepartment(departmentId string) error {
+	return s.Repo.DeleteDepartment(departmentId)
 }
