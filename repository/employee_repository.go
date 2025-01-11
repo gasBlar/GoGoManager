@@ -48,7 +48,6 @@ func (r *EmployeeRepository) GetAllEmployees(managerId int) ([]models.Employee, 
 
 	rows, err := r.DB.Query(query, managerId)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -67,14 +66,14 @@ func (r *EmployeeRepository) GetAllEmployees(managerId int) ([]models.Employee, 
 	return employees, nil
 }
 
-func (r *EmployeeRepository) CreateEmployee(employee *models.Employee) error {
+func (r *EmployeeRepository) CreateEmployee(employee *models.Employee) ([]models.Employee, error) {
 	query := `INSERT INTO employee (identityNumber, name, employeeImageUri, gender, departmentId) 
               VALUES (?, ?, ?, ?, ?)`
 	_, err := r.DB.Exec(query, employee.IdentityNumber, employee.Name, employee.EmployeeImageUri, employee.Gender, employee.DepartmentId)
 	if err != nil {
-		return err // Return the exact error for logging
+		return nil, err // Return the exact error for logging
 	}
-	return nil
+	return nil, err
 }
 
 func (r *EmployeeRepository) DeleteEmployee(managerId int, identityNumber string) error {

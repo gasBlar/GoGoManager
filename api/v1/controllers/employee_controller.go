@@ -33,14 +33,18 @@ func (c *EmployeeController) CreateEmployee(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := c.Service.CreateEmployee(&employee); err != nil {
-		log.Println("Error creating employee:", err)
+	createdEmployee, err := c.Service.CreateEmployee(&employee)
+	if err != nil {
 		http.Error(w, "Error creating employee", http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Employee created successfully"})
+	json.NewEncoder(w).Encode(createdEmployee)
+
+	// w.WriteHeader(http.StatusCreated)
+	// json.NewEncoder(w).Encode(map[string]string{"message": "Employee created successfully"})
 }
 
 func (c *EmployeeController) GetAllEmployees(w http.ResponseWriter, r *http.Request) {

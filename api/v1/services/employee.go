@@ -13,8 +13,12 @@ func NewEmployeeService(repo *repository.EmployeeRepository) *EmployeeService {
 	return &EmployeeService{Repo: repo}
 }
 
-func (s *EmployeeService) CreateEmployee(employee *models.Employee) error {
-	return s.Repo.CreateEmployee(employee)
+func (s *EmployeeService) CreateEmployee(employee *models.Employee) (*models.Employee, error) {
+	_, err := s.Repo.CreateEmployee(employee)
+	if err != nil {
+		return nil, err
+	}
+	return employee, nil
 }
 
 func (s *EmployeeService) GetAllEmployees(managerId int) ([]models.Employee, error) {
