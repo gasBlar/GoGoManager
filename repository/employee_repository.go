@@ -89,10 +89,10 @@ func (r *EmployeeRepository) DeleteEmployee(managerId int, identityNumber string
 	return nil
 }
 
-func (r *EmployeeRepository) PatchEmployee(managerId int, identityNumber string, employee *models.EmployeePatch) error {
+func (r *EmployeeRepository) PatchEmployee(managerId int, identityNumber string, employee *models.EmployeePatch) (string, error) {
 
 	if err := r.ValidateManagerAccess(managerId, identityNumber); err != nil {
-		return err
+		return "", err
 	}
 
 	// Buat query SQL secara dinamis berdasarkan kolom yang diubah
@@ -128,7 +128,38 @@ func (r *EmployeeRepository) PatchEmployee(managerId int, identityNumber string,
 
 	_, err := r.DB.Exec(query, args...)
 	if err != nil {
-		return err // Return the exact error for logging
+		return "", err // Return the exact error for logging
 	}
-	return nil
+
+	// Jika identityNumber diubah, gunakan identityNumber baru, jika tidak, gunakan yang lama
+	if employee.IdentityNumber != nil {
+		return *employee.IdentityNumber, nil
+	}
+	return identityNumber, nil
+}
+
+func (r *EmployeeRepository) GetEmployeeByIdentityNumber(managerId int, identityNumber string) (*models.Employee, error) {
+	// Validasi akses manager
+	if err := r.ValidateManagerAccess(managerId, identityNumber); err != nil {
+		return nil, err
+	}
+
+	// Ambil data employee berdasarkan identityNumber
+	query := `
+		SELECT identityNumber, name, employeeImageUri, gender, departmentId
+		FROM employee
+		WHERE identityNumber = ?
+	`
+	var employee models.Employee
+	err := r.DB.QueryRow(query, identityNumber).Scan(
+		&employee.IdentityNumber,
+		&employee.Name,
+		&employee.EmployeeImageUri,
+		&employee.Gender,
+		&employee.DepartmentId,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &employee, nil
 }

@@ -29,6 +29,10 @@ func (s *EmployeeService) DeleteEmployee(userId int, identityNumber string) erro
 	return s.Repo.DeleteEmployee(userId, identityNumber)
 }
 
-func (s *EmployeeService) PatchEmployee(managerId int, identityNumber string, employeePatch *models.EmployeePatch) error {
+func (s *EmployeeService) PatchEmployee(managerId int, identityNumber string, employeePatch *models.EmployeePatch) (string, error) {
 	return s.Repo.PatchEmployee(managerId, identityNumber, employeePatch)
+}
+
+func (s *EmployeeService) GetEmployeeByIdentityNumber(managerId int, identityNumber string) (*models.Employee, error) {
+	return s.Repo.GetEmployeeByIdentityNumber(managerId, identityNumber)
 }
