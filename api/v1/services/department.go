@@ -43,3 +43,11 @@ func GetAllDepartments(ctx context.Context, db *sql.DB) ([]models.Department, er
 
 	return departments, nil
 }
+
+func (s *DepartmentService) PatchDepartment(departmentId string, departmentPatch *models.DepartmentPatch) error {
+	return s.Repo.PatchDepartment(departmentId, departmentPatch)
+}
+
+func (s *DepartmentService) DeleteDepartment(departmentId string) error {
+	return s.Repo.DeleteDepartment(departmentId)
+}
