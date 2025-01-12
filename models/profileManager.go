@@ -30,19 +30,19 @@ type ProfileManagerClaims struct {
 }
 
 type ProfileManagerUpdateRequest struct {
-	Email        string `json:"email" validate:"omitempty,email"`
-	Name         string `json:"name" validate:"omitempty"`
-	UserImage    string `json:"UserImage" validate:"omitempty"`
-	CompanyName  string `json:"CompanyName" validate:"omitempty"`
-	CompanyImage string `json:"CompanyImage" validate:"omitempty"`
+	Email           string `json:"email" validate:"required,email"`
+	Name            string `json:"name" validate:"omitempty,min=4,max=52"`
+	UserImageUri    string `json:"UserImageUri" validate:"omitempty"`
+	CompanyName     string `json:"CompanyName" validate:"omitempty,min=4,max=52"`
+	CompanyImageUri string `json:"CompanyImageUri" validate:"omitempty"`
 }
 
 type ProfileManagerResponse struct {
 	Email        string `json:"email"`
 	Name         string `json:"name"`
-	UserImage    string `json:"UserImage"`
+	UserImage    string `json:"UserImageUri"`
 	CompanyName  string `json:"CompanyName"`
-	CompanyImage string `json:"CompanyImage"`
+	CompanyImage string `json:"CompanyImageUri"`
 }
 
 func (p *ProfileManagerAuth) ToResponse() ProfileManagerResponse {
