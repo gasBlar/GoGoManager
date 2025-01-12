@@ -26,7 +26,7 @@ func (r *userRepository) FindById(id int) (models.ProfileManagerAuth, error) {
 	var user models.ProfileManagerAuth
 
 	query := "SELECT pm.id, a.email, pm.authId, pm.name, pm.userImage, pm.companyName, pm.companyImage FROM profileManager pm LEFT JOIN auth a on pm.authId = a.id WHERE pm.id = ?"
-	err := r.db.QueryRow(query, id).Scan(&user.Id, &user.Email, &user.AuthId, &user.Name, &user.UserImage, &user.CompanyName, &user.CompanyImage)
+	err := r.db.QueryRow(query, id).Scan(&user.Id, &user.Email, &user.AuthId, &user.Name, &user.UserImageUri, &user.CompanyName, &user.CompanyImageUri)
 
 	if err != nil {
 		return user, err
