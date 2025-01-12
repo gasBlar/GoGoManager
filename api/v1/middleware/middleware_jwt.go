@@ -9,7 +9,7 @@ import (
 )
 
 var whitelistPath = []string{
-	"/api/v1/auth",
+	"/v1/auth",
 	"/metrics",
 }
 
