@@ -52,7 +52,7 @@ func LoginRegisterHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		utils.Response(w, http.StatusOK, "", res)
+		utils.Response(w, http.StatusCreated, "", res)
 	}
 }
 
