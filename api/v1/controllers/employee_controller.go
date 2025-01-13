@@ -2,7 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	"net/http"
 
@@ -35,6 +38,14 @@ func (c *EmployeeController) CreateEmployee(w http.ResponseWriter, r *http.Reque
 
 	createdEmployee, err := c.Service.CreateEmployee(&employee)
 	if err != nil {
+		if strings.Contains(fmt.Sprint(err), "Error 1062 (23000)") {
+			http.Error(w, "Identity Number must be unique", http.StatusConflict)
+			return
+		}
+		if strings.Contains(fmt.Sprint(err), "a foreign key constraint fails") {
+			http.Error(w, "Department Id Not Valid", http.StatusBadRequest)
+			return
+		}
 		http.Error(w, "Error creating employee", http.StatusInternalServerError)
 		return
 	}
@@ -48,11 +59,31 @@ func (c *EmployeeController) CreateEmployee(w http.ResponseWriter, r *http.Reque
 }
 
 func (c *EmployeeController) GetAllEmployees(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(*utils.Claims)
-	managerId := user.Id
+	// Parse query parameters
+	queryParams := r.URL.Query()
+
+	// Default values
+	limit := 5
+	offset := 0
+
+	// Parse limit and offset
+	if l, err := strconv.Atoi(queryParams.Get("limit")); err == nil && l > 0 {
+		limit = l
+	}
+	if o, err := strconv.Atoi(queryParams.Get("offset")); err == nil && o >= 0 {
+		offset = o
+	}
+
+	// Parse other parameters
+	identityNumber := queryParams.Get("identityNumber")
+	name := queryParams.Get("name")
+	gender := queryParams.Get("gender")
+	departmentId := queryParams.Get("departmentId")
+
 	// Mendapatkan data seluruh employee dari service
-	employees, err := c.Service.GetAllEmployees(managerId)
+	employees, err := c.Service.GetAllEmployees(limit, offset, identityNumber, name, gender, departmentId)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Error retrieving employees", http.StatusInternalServerError)
 		return
 	}
@@ -65,11 +96,11 @@ func (c *EmployeeController) GetAllEmployees(w http.ResponseWriter, r *http.Requ
 func (c *EmployeeController) DeleteEmployee(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	identityNumber := vars["identityNumber"]
-	user := r.Context().Value("user").(*utils.Claims)
+	// user := r.Context().Value("user").(*utils.Claims)
 
-	if err := c.Service.DeleteEmployee(user.Id, identityNumber); err != nil {
-		if err.Error() == "access denied: manager does not have permission to modify this employee" {
-			http.Error(w, err.Error(), http.StatusForbidden)
+	if err := c.Service.DeleteEmployee(identityNumber); err != nil {
+		if strings.Contains(fmt.Sprint(err), "identityNumber not found") {
+			http.Error(w, "identityNumber not found", http.StatusNotFound)
 			return
 		}
 		http.Error(w, "Error deleting employee", http.StatusInternalServerError)
@@ -77,13 +108,13 @@ func (c *EmployeeController) DeleteEmployee(w http.ResponseWriter, r *http.Reque
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Employee deleted successfully"})
+	json.NewEncoder(w).Encode(map[string]string{"message": "Deleted"})
 }
 
 func (c *EmployeeController) PatchEmployee(w http.ResponseWriter, r *http.Request) {
 	// Ambil managerId dari token (contoh dengan header Authorization)
-	user := r.Context().Value("user").(*utils.Claims)
-	log.Println(user.Id)
+	// user := r.Context().Value("user").(*utils.Claims)
+	// log.Println(user.Id)
 
 	var employee models.EmployeePatch
 	if err := json.NewDecoder(r.Body).Decode(&employee); err != nil {
@@ -100,21 +131,29 @@ func (c *EmployeeController) PatchEmployee(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	newIdentityNumber, err := c.Service.PatchEmployee(user.Id, identityNumber, &employee)
+	newIdentityNumber, err := c.Service.PatchEmployee(identityNumber, &employee)
 	if err != nil {
-		if err.Error() == "access denied: manager does not have permission to modify this employee" {
-			http.Error(w, err.Error(), http.StatusForbidden)
+		if strings.Contains(fmt.Sprint(err), "Error 1062 (23000)") {
+			http.Error(w, "Identity Number is used", http.StatusConflict)
 			return
 		}
-		log.Println("Error Updating employee:", err)
+		if strings.Contains(fmt.Sprint(err), "a foreign key constraint fails") {
+			http.Error(w, "Department Id Not Valid", http.StatusBadRequest)
+			return
+		}
+		if strings.Contains(fmt.Sprint(err), "identityNumber not found") {
+			http.Error(w, "identityNumber not found", http.StatusNotFound)
+			return
+		}
 		http.Error(w, "Error updating employee", http.StatusInternalServerError)
 		return
 	}
 
+	log.Println(newIdentityNumber)
+
 	// Ambil data employee yang baru diperbarui
-	updatedEmployee, err := c.Service.GetEmployeeByIdentityNumber(user.Id, newIdentityNumber)
+	updatedEmployee, err := c.Service.GetEmployeeByIdentityNumber(newIdentityNumber)
 	if err != nil {
-		log.Println("Error fetching updated employee:", err)
 		http.Error(w, "Error fetching updated employee", http.StatusInternalServerError)
 		return
 	}
