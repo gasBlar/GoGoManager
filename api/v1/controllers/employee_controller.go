@@ -25,8 +25,15 @@ func NewEmployeeController(service *services.EmployeeService) *EmployeeControlle
 }
 
 func (c *EmployeeController) CreateEmployee(w http.ResponseWriter, r *http.Request) {
+	//validasi content type
+	if r.Header.Get("Content-Type") != "application/json" {
+		http.Error(w, "Unsupported Content-Type, must be application/json", http.StatusBadRequest)
+		return
+	}
+
 	var employee models.Employee
 	if err := json.NewDecoder(r.Body).Decode(&employee); err != nil {
+		log.Println(err)
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
@@ -46,6 +53,7 @@ func (c *EmployeeController) CreateEmployee(w http.ResponseWriter, r *http.Reque
 			http.Error(w, "Department Id Not Valid", http.StatusBadRequest)
 			return
 		}
+		log.Println(err)
 		http.Error(w, "Error creating employee", http.StatusInternalServerError)
 		return
 	}
@@ -112,9 +120,11 @@ func (c *EmployeeController) DeleteEmployee(w http.ResponseWriter, r *http.Reque
 }
 
 func (c *EmployeeController) PatchEmployee(w http.ResponseWriter, r *http.Request) {
-	// Ambil managerId dari token (contoh dengan header Authorization)
-	// user := r.Context().Value("user").(*utils.Claims)
-	// log.Println(user.Id)
+	// Validasi Content-Type header
+	if r.Header.Get("Content-Type") != "application/json" {
+		http.Error(w, "Unsupported Content-Type, must be application/json", http.StatusBadRequest)
+		return
+	}
 
 	var employee models.EmployeePatch
 	if err := json.NewDecoder(r.Body).Decode(&employee); err != nil {
@@ -130,6 +140,8 @@ func (c *EmployeeController) PatchEmployee(w http.ResponseWriter, r *http.Reques
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	log.Println((employee.IdentityNumber))
 
 	newIdentityNumber, err := c.Service.PatchEmployee(identityNumber, &employee)
 	if err != nil {
