@@ -26,7 +26,7 @@ func (lrw *loggingResponseWriter) Write(data []byte) (int, error) {
 func LogMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Only log specific requests
-		if r.URL.Path == "/v1/user" && r.Method == "PATCH" {
+		if r.URL.Path == "/v1/department" && r.Method == "PATCH" {
 			// Read and log the request body
 			var requestBody bytes.Buffer
 			if r.Body != nil {
