@@ -28,6 +28,11 @@ func GetDataUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateDataUserHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Header.Get("Content-Type") == "" {
+		http.Error(w, "Missing Content-Type header", http.StatusBadRequest)
+		return
+	}
+
 	user := r.Context().Value("user").(*utils.Claims)
 	var rBody []byte
 	var err error
