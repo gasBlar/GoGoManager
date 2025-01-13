@@ -40,7 +40,7 @@ type ProfileManagerUpdateRequest struct {
 type ProfileManagerResponse struct {
 	Email           string `json:"email"`
 	Name            string `json:"name"`
-	UserImageUri    string `json:"userImgUri"`
+	UserImageUri    string `json:"userImageUri"`
 	CompanyName     string `json:"companyName"`
 	CompanyImageUri string `json:"companyImageUri"`
 }
