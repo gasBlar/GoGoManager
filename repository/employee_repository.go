@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"log"
+	"strconv"
 
 	"github.com/gasBlar/GoGoManager/models"
 )
@@ -92,7 +93,8 @@ func (r *EmployeeRepository) GetAllEmployees(limit, offset int, identityNumber, 
 func (r *EmployeeRepository) CreateEmployee(employee *models.Employee) ([]models.Employee, error) {
 	query := `INSERT INTO employee (identityNumber, name, employeeImageUri, gender, departmentId) 
               VALUES (?, ?, ?, ?, ?)`
-	_, err := r.DB.Exec(query, employee.IdentityNumber, employee.Name, employee.EmployeeImageUri, employee.Gender, employee.DepartmentId)
+	departmentId, _ := strconv.Atoi(employee.DepartmentId)
+	_, err := r.DB.Exec(query, employee.IdentityNumber, employee.Name, employee.EmployeeImageUri, employee.Gender, departmentId)
 	if err != nil {
 		return nil, err // Return the exact error for logging
 	}
@@ -135,6 +137,7 @@ func (r *EmployeeRepository) PatchEmployee(identityNumber string, employee *mode
 	// var updates []string
 
 	if employee.IdentityNumber != nil {
+		log.Println("Input : ", *employee.IdentityNumber)
 		query += " identityNumber = ?,"
 		args = append(args, *employee.IdentityNumber)
 	}
