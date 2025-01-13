@@ -21,18 +21,18 @@ func (s *EmployeeService) CreateEmployee(employee *models.Employee) (*models.Emp
 	return employee, nil
 }
 
-func (s *EmployeeService) GetAllEmployees(managerId int) ([]models.Employee, error) {
-	return s.Repo.GetAllEmployees(managerId)
+func (s *EmployeeService) GetAllEmployees() ([]models.Employee, error) {
+	return s.Repo.GetAllEmployees()
 }
 
-func (s *EmployeeService) DeleteEmployee(userId int, identityNumber string) error {
-	return s.Repo.DeleteEmployee(userId, identityNumber)
+func (s *EmployeeService) DeleteEmployee(identityNumber string) error {
+	return s.Repo.DeleteEmployee(identityNumber)
 }
 
-func (s *EmployeeService) PatchEmployee(managerId int, identityNumber string, employeePatch *models.EmployeePatch) (string, error) {
-	return s.Repo.PatchEmployee(managerId, identityNumber, employeePatch)
+func (s *EmployeeService) PatchEmployee(identityNumber string, employeePatch *models.EmployeePatch) (string, error) {
+	return s.Repo.PatchEmployee(identityNumber, employeePatch)
 }
 
-func (s *EmployeeService) GetEmployeeByIdentityNumber(managerId int, identityNumber string) (*models.Employee, error) {
-	return s.Repo.GetEmployeeByIdentityNumber(managerId, identityNumber)
+func (s *EmployeeService) GetEmployeeByIdentityNumber(identityNumber string) (*models.Employee, error) {
+	return s.Repo.GetEmployeeByIdentityNumber(identityNumber)
 }

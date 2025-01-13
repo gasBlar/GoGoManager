@@ -38,15 +38,12 @@ func (r *EmployeeRepository) ValidateManagerAccess(managerId int, identityNumber
 	return nil
 }
 
-func (r *EmployeeRepository) GetAllEmployees(managerId int) ([]models.Employee, error) {
+func (r *EmployeeRepository) GetAllEmployees() ([]models.Employee, error) {
 	// Query untuk mengambil semua data employee
-	query := `SELECT e.identityNumber, e.name, e.employeeImageUri, e.gender, e.departmentId
-    		FROM employee e
-    		INNER JOIN department d ON e.departmentId = d.id
-    		INNER JOIN profileManager pm ON d.profileId = pm.id
-    		WHERE pm.id = ?`
+	query := `SELECT identityNumber, name, employeeImageUri, gender, departmentId
+    		FROM employee`
 
-	rows, err := r.DB.Query(query, managerId)
+	rows, err := r.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -76,9 +73,15 @@ func (r *EmployeeRepository) CreateEmployee(employee *models.Employee) ([]models
 	return nil, err
 }
 
-func (r *EmployeeRepository) DeleteEmployee(managerId int, identityNumber string) error {
-	if err := r.ValidateManagerAccess(managerId, identityNumber); err != nil {
-		return err
+func (r *EmployeeRepository) DeleteEmployee(identityNumber string) error {
+	queryValidate := `SELECT COUNT(*) FROM employee WHERE identityNumber = ?`
+	var count int
+	errVal := r.DB.QueryRow(queryValidate, identityNumber).Scan(&count)
+	if errVal != nil {
+		return errVal
+	}
+	if count == 0 {
+		return errors.New("identityNumber not found")
 	}
 
 	query := `DELETE FROM employee WHERE identityNumber = ?`
@@ -89,10 +92,15 @@ func (r *EmployeeRepository) DeleteEmployee(managerId int, identityNumber string
 	return nil
 }
 
-func (r *EmployeeRepository) PatchEmployee(managerId int, identityNumber string, employee *models.EmployeePatch) (string, error) {
-
-	if err := r.ValidateManagerAccess(managerId, identityNumber); err != nil {
-		return "", err
+func (r *EmployeeRepository) PatchEmployee(identityNumber string, employee *models.EmployeePatch) (string, error) {
+	queryValidate := `SELECT COUNT(*) FROM employee WHERE identityNumber = ?`
+	var count int
+	errVal := r.DB.QueryRow(queryValidate, identityNumber).Scan(&count)
+	if errVal != nil {
+		return "", errVal
+	}
+	if count == 0 {
+		return "", errors.New("identityNumber not found")
 	}
 
 	// Buat query SQL secara dinamis berdasarkan kolom yang diubah
@@ -124,12 +132,13 @@ func (r *EmployeeRepository) PatchEmployee(managerId int, identityNumber string,
 	// Tambahkan kondisi untuk identityNumber
 	query = query[:len(query)-1] + " WHERE identityNumber = ?"
 	args = append(args, identityNumber)
-	log.Println(query)
 
 	_, err := r.DB.Exec(query, args...)
 	if err != nil {
 		return "", err // Return the exact error for logging
 	}
+
+	log.Println()
 
 	// Jika identityNumber diubah, gunakan identityNumber baru, jika tidak, gunakan yang lama
 	if employee.IdentityNumber != nil {
@@ -138,11 +147,11 @@ func (r *EmployeeRepository) PatchEmployee(managerId int, identityNumber string,
 	return identityNumber, nil
 }
 
-func (r *EmployeeRepository) GetEmployeeByIdentityNumber(managerId int, identityNumber string) (*models.Employee, error) {
-	// Validasi akses manager
-	if err := r.ValidateManagerAccess(managerId, identityNumber); err != nil {
-		return nil, err
-	}
+func (r *EmployeeRepository) GetEmployeeByIdentityNumber(identityNumber string) (*models.Employee, error) {
+	// // Validasi akses manager
+	// if err := r.ValidateManagerAccess(managerId, identityNumber); err != nil {
+	// 	return nil, err
+	// }
 
 	// Ambil data employee berdasarkan identityNumber
 	query := `
