@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"net/http"
@@ -58,11 +59,31 @@ func (c *EmployeeController) CreateEmployee(w http.ResponseWriter, r *http.Reque
 }
 
 func (c *EmployeeController) GetAllEmployees(w http.ResponseWriter, r *http.Request) {
-	// user := r.Context().Value("user").(*utils.Claims)
-	// managerId := user.Id
+	// Parse query parameters
+	queryParams := r.URL.Query()
+
+	// Default values
+	limit := 5
+	offset := 0
+
+	// Parse limit and offset
+	if l, err := strconv.Atoi(queryParams.Get("limit")); err == nil && l > 0 {
+		limit = l
+	}
+	if o, err := strconv.Atoi(queryParams.Get("offset")); err == nil && o >= 0 {
+		offset = o
+	}
+
+	// Parse other parameters
+	identityNumber := queryParams.Get("identityNumber")
+	name := queryParams.Get("name")
+	gender := queryParams.Get("gender")
+	departmentId := queryParams.Get("departmentId")
+
 	// Mendapatkan data seluruh employee dari service
-	employees, err := c.Service.GetAllEmployees()
+	employees, err := c.Service.GetAllEmployees(limit, offset, identityNumber, name, gender, departmentId)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Error retrieving employees", http.StatusInternalServerError)
 		return
 	}

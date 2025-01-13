@@ -21,8 +21,8 @@ func (s *EmployeeService) CreateEmployee(employee *models.Employee) (*models.Emp
 	return employee, nil
 }
 
-func (s *EmployeeService) GetAllEmployees() ([]models.Employee, error) {
-	return s.Repo.GetAllEmployees()
+func (s *EmployeeService) GetAllEmployees(limit, offset int, identityNumber, name, gender, departmentId string) ([]models.Employee, error) {
+	return s.Repo.GetAllEmployees(limit, offset, identityNumber, name, gender, departmentId)
 }
 
 func (s *EmployeeService) DeleteEmployee(identityNumber string) error {

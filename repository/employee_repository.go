@@ -38,12 +38,38 @@ func (r *EmployeeRepository) ValidateManagerAccess(managerId int, identityNumber
 	return nil
 }
 
-func (r *EmployeeRepository) GetAllEmployees() ([]models.Employee, error) {
+func (r *EmployeeRepository) GetAllEmployees(limit, offset int, identityNumber, name, gender, departmentId string) ([]models.Employee, error) {
 	// Query untuk mengambil semua data employee
-	query := `SELECT identityNumber, name, employeeImageUri, gender, departmentId
-    		FROM employee`
+	// query := `SELECT identityNumber, name, employeeImageUri, gender, departmentId
+	// 		FROM employee`
 
-	rows, err := r.DB.Query(query)
+	query := "SELECT identityNumber, name, employeeImageUri, gender, departmentId FROM employee WHERE 1=1"
+	args := []interface{}{}
+
+	if identityNumber != "" {
+		query += " AND LOWER(identityNumber) LIKE ?"
+		args = append(args, identityNumber+"%")
+	}
+
+	if name != "" {
+		query += " AND LOWER(name) LIKE ?"
+		args = append(args, "%"+name+"%")
+	}
+
+	if gender != "" {
+		query += " AND gender = ?"
+		args = append(args, gender)
+	}
+
+	if departmentId != "" {
+		query += " AND departmentId = ?"
+		args = append(args, departmentId)
+	}
+
+	query += " LIMIT ? OFFSET ?"
+	args = append(args, limit, offset)
+
+	rows, err := r.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
