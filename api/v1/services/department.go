@@ -29,9 +29,20 @@ func (s *DepartmentService) CreateDepartment(department *models.Department, prof
 	return s.Repo.CreateDepartment(department, profileId)
 }
 
-func GetAllDepartments(ctx context.Context, db *sql.DB) ([]models.Department, error) {
-	query := "SELECT * FROM department"
-	rows, err := db.QueryContext(ctx, query)
+func GetAllDepartments(limit, offset int, name string, ctx context.Context, db *sql.DB) ([]models.Department, error) {
+	query := "SELECT id, name, profileId FROM department WHERE 1=1"
+	args := []interface{}{}
+
+	if name != "" {
+		query += " AND LOWER(name) LIKE ?"
+		args = append(args, "%"+name+"%")
+	}
+
+	query += " LIMIT ? OFFSET ?"
+	args = append(args, limit, offset)
+	// query := "SELECT * FROM department"
+	rows, err := db.Query(query, args...)
+	// rows, err := db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}

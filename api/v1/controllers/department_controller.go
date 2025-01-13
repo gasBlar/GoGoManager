@@ -143,8 +143,25 @@ func (c *DepartmentController) DeleteDepartment(w http.ResponseWriter, r *http.R
 
 func GetDepartments(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		departments, err := services.GetAllDepartments(r.Context(), db)
+		// Parse query parameters
+		queryParams := r.URL.Query()
+
+		// Default values
+		limit := 5
+		offset := 0
+
+		// Parse limit and offset
+		if l, err := strconv.Atoi(queryParams.Get("limit")); err == nil && l > 0 {
+			limit = l
+		}
+		if o, err := strconv.Atoi(queryParams.Get("offset")); err == nil && o >= 0 {
+			offset = o
+		}
+		name := queryParams.Get("name")
+
+		departments, err := services.GetAllDepartments(limit, offset, name, r.Context(), db)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, "Failed to retrieve departments", http.StatusInternalServerError)
 			return
 		}
