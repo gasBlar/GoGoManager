@@ -3,6 +3,8 @@ package services
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"unicode/utf8"
 
 	"github.com/gasBlar/GoGoManager/models"
 	"github.com/gasBlar/GoGoManager/repository"
@@ -16,8 +18,15 @@ func NewDepartmentService(repo *repository.DepartmentRepository) *DepartmentServ
 	return &DepartmentService{Repo: repo}
 }
 
-func (s *DepartmentService) CreateDepartment(department *models.Department, id int) error {
-	return s.Repo.CreateDepartment(department, id)
+func (s *DepartmentService) CreateDepartment(department *models.Department, profileId int) error {
+	// Validasi nama department
+	nameLength := utf8.RuneCountInString(department.Name)
+	if nameLength < 4 || nameLength > 33 {
+		return fmt.Errorf("department name must be between 4 and 33 characters")
+	}
+
+	// Panggil repository untuk membuat department
+	return s.Repo.CreateDepartment(department, profileId)
 }
 
 func GetAllDepartments(ctx context.Context, db *sql.DB) ([]models.Department, error) {

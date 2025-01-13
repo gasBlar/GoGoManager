@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
+	"unicode/utf8"
 
 	"net/http"
 
@@ -25,20 +26,37 @@ func NewDepartmentController(service *services.DepartmentService) *DepartmentCon
 func (c *DepartmentController) CreateDepartment(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*utils.Claims)
 	var department models.Department
+
+	// **Validasi Content-Type**
+	if r.Header.Get("Content-Type") != "application/json" {
+		http.Error(w, "Invalid Content-Type, must be application/json", http.StatusBadRequest)
+		return
+	}
+
+	// Decode request body
 	if err := json.NewDecoder(r.Body).Decode(&department); err != nil {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
+	// Validate department name length
+	nameLength := utf8.RuneCountInString(department.Name)
+	if nameLength < 4 || nameLength > 33 {
+		http.Error(w, "Department name must be between 4 and 33 characters", http.StatusBadRequest)
+		return
+	}
+
+	// Call service to create department
 	if err := c.Service.CreateDepartment(&department, user.Id); err != nil {
 		log.Println("Error creating department:", err)
 		http.Error(w, "Error creating department", http.StatusInternalServerError)
 		return
 	}
 
+	// Send response
 	w.WriteHeader(http.StatusCreated)
 	response := map[string]string{
-		"departmentId": strconv.Itoa(department.Id), // Assuming department.ID is set by the service
+		"departmentId": strconv.Itoa(department.Id),
 		"name":         department.Name,
 	}
 	json.NewEncoder(w).Encode(response)
