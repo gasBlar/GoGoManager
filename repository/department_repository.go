@@ -42,9 +42,15 @@ func (r *DepartmentRepository) CreateDepartment(department *models.Department, p
 	return nil
 }
 
+func (r *authRepository) CheckDepartementExist(departmentId string) bool {
+	var id string
+	res := r.db.QueryRow("SELECT id FROM department WHERE id = ?", departmentId).Scan(&id)
+	return res != sql.ErrNoRows
+}
 
 func (r *DepartmentRepository) PatchDepartment(departmentId string, department *models.DepartmentPatch) error {
 	// Buat query SQL secara dinamis berdasarkan kolom yang diubah
+
 	query := "UPDATE department SET "
 	var args []interface{}
 
@@ -58,7 +64,7 @@ func (r *DepartmentRepository) PatchDepartment(departmentId string, department *
 	}
 
 	// Tambahkan kondisi untuk departmentId
-	query = query[:len(query)-1] + " WHERE Id = ?"
+	query = query[:len(query)-1] + " WHERE id = ?"
 	args = append(args, departmentId)
 	// log.Println(query)
 
