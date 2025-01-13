@@ -26,7 +26,7 @@ func (r *userRepository) FindById(id int) (models.ProfileManagerAuth, error) {
 	var user models.ProfileManagerAuth
 
 	query := "SELECT pm.id, a.email, pm.authId, pm.name, pm.userImage, pm.companyName, pm.companyImage FROM profileManager pm LEFT JOIN auth a on pm.authId = a.id WHERE pm.id = ?"
-	err := r.db.QueryRow(query, id).Scan(&user.Id, &user.Email, &user.AuthId, &user.Name, &user.UserImage, &user.CompanyName, &user.CompanyImage)
+	err := r.db.QueryRow(query, id).Scan(&user.Id, &user.Email, &user.AuthId, &user.Name, &user.UserImageUri, &user.CompanyName, &user.CompanyImageUri)
 
 	if err != nil {
 		return user, err
@@ -50,7 +50,7 @@ func (r *userRepository) UpdatePartial(id int, user models.ProfileManagerUpdateR
 		}
 	}()
 
-	if user.Name != "" || user.UserImage != "" || user.CompanyName != "" || user.CompanyImage != "" {
+	if user.Name != "" || user.UserImageUri != "" || user.CompanyName != "" || user.CompanyImageUri != "" {
 		query := "UPDATE profileManager SET"
 		args := []interface{}{}
 
@@ -58,17 +58,17 @@ func (r *userRepository) UpdatePartial(id int, user models.ProfileManagerUpdateR
 			query += " name = ?,"
 			args = append(args, user.Name)
 		}
-		if user.UserImage != "" {
+		if user.UserImageUri != "" {
 			query += " userImage = ?,"
-			args = append(args, user.UserImage)
+			args = append(args, user.UserImageUri)
 		}
 		if user.CompanyName != "" {
 			query += " companyName = ?,"
 			args = append(args, user.CompanyName)
 		}
-		if user.CompanyImage != "" {
+		if user.CompanyImageUri != "" {
 			query += " companyImage = ?,"
-			args = append(args, user.CompanyImage)
+			args = append(args, user.CompanyImageUri)
 		}
 
 		query = query[:len(query)-1] + " WHERE id = ?"

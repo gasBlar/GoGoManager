@@ -13,7 +13,7 @@ func InitRoutes(db *sql.DB) *mux.Router {
 	r.Use(middleware.JWTMiddleware)
 	r.Use(middleware.LogMiddleware)
 	middleware.PromotheusInit()
-	s := r.PathPrefix("/api/v1").Subrouter()
+	s := r.PathPrefix("/v1").Subrouter()
 
 	r.Handle("/metrics", promhttp.Handler())
 	r.Use(middleware.TrackMetrics)
@@ -21,7 +21,9 @@ func InitRoutes(db *sql.DB) *mux.Router {
 	ExampleRoutes(s)
 	AuthRoutes(s)
 	UserRoutes(s)
+	RegisterFileRoutes(s)
 	EmployeeRoutes(db, s)
+	DepartmentRoutes(db, s)
 
 	return r
 }

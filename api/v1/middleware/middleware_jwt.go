@@ -9,7 +9,7 @@ import (
 )
 
 var whitelistPath = []string{
-	"/api/v1/auth",
+	"/v1/auth",
 	"/metrics",
 }
 
@@ -30,12 +30,12 @@ func JWTMiddleware(next http.Handler) http.Handler {
 		}
 
 		authorizationHeader := r.Header.Get("Authorization")
-		if authorizationHeader == "" || !strings.Contains(authorizationHeader, "Bearer") {
+		if authorizationHeader == "" || !strings.HasPrefix(strings.ToLower(authorizationHeader), "bearer ") {
 			http.Error(w, "Authorization header is required", http.StatusUnauthorized)
 			return
 		}
 
-		tokenString := strings.Replace(authorizationHeader, "Bearer ", "", -1)
+		tokenString := strings.TrimSpace(authorizationHeader[len("Bearer "):])
 
 		user, err := utils.VerifyToken(tokenString)
 		if err != nil {
