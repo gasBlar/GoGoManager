@@ -130,39 +130,52 @@ func (r *EmployeeRepository) PatchEmployee(identityNumber string, employee *mode
 	if count == 0 {
 		return "", errors.New("identityNumber not found")
 	}
+	query := `UPDATE employee SET 
+			identityNumber = ?, 
+			name = ?, 
+			employeeImageUri = ?, 
+			gender = ?,
+			departmentId = ?
+			WHERE identityNumber = ?`
 
 	// Buat query SQL secara dinamis berdasarkan kolom yang diubah
-	query := "UPDATE employee SET "
-	var args []interface{}
-	// var updates []string
+	// query := "UPDATE employee SET "
+	// var args []interface{}
+	// // var updates []string
 
-	if employee.IdentityNumber != nil {
-		log.Println("Input : ", *employee.IdentityNumber)
-		query += " identityNumber = ?,"
-		args = append(args, *employee.IdentityNumber)
-	}
-	if employee.Name != nil {
-		query += " name = ?,"
-		args = append(args, *employee.Name)
-	}
-	if employee.EmployeeImageUri != nil {
-		query += " employeeImageUri = ?,"
-		args = append(args, *employee.EmployeeImageUri)
-	}
-	if employee.Gender != nil {
-		query += " gender = ?,"
-		args = append(args, *employee.Gender)
-	}
-	if employee.DepartmentId != nil {
-		query += " departmentId = ?,"
-		args = append(args, *employee.DepartmentId)
-	}
+	// if employee.IdentityNumber != nil {
+	// 	log.Println("Input : ", *employee.IdentityNumber)
+	// 	query += " identityNumber = ?,"
+	// 	args = append(args, *employee.IdentityNumber)
+	// }
+	// if employee.Name != nil {
+	// 	query += " name = ?,"
+	// 	args = append(args, *employee.Name)
+	// }
+	// if employee.EmployeeImageUri != nil {
+	// 	query += " employeeImageUri = ?,"
+	// 	args = append(args, *employee.EmployeeImageUri)
+	// }
+	// if employee.Gender != nil {
+	// 	query += " gender = ?,"
+	// 	args = append(args, *employee.Gender)
+	// }
+	// if employee.DepartmentId != nil {
+	// 	query += " departmentId = ?,"
+	// 	args = append(args, *employee.DepartmentId)
+	// }
 
-	// Tambahkan kondisi untuk identityNumber
-	query = query[:len(query)-1] + " WHERE identityNumber = ?"
-	args = append(args, identityNumber)
+	// // Tambahkan kondisi untuk identityNumber
+	// query = query[:len(query)-1] + " WHERE identityNumber = ?"
+	// args = append(args, identityNumber)
 
-	_, err := r.DB.Exec(query, args...)
+	_, err := r.DB.Exec(query, 
+						*employee.IdentityNumber, 
+						*employee.Name, 
+						*employee.EmployeeImageUri, 
+						*employee.Gender, 
+						*employee.DepartmentId, 
+						identityNumber)
 	if err != nil {
 		return "", err // Return the exact error for logging
 	}
